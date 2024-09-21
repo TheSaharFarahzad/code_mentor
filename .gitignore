@@ -1,4 +1,12 @@
-venv/
-__pycache__/
+# Python bytecode
 *.pyc
+__pycache__/
+
+# SQLite database files
 *.sqlite3
+
+# Environment variables
+.env
+
+# Virtual environment
+venv/

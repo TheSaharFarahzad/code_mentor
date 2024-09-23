@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: |
           . venv/bin/activate
-          python manage.py test
+          pytest
 
       - name: Notify on success
         if: success()

@@ -24,17 +24,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          . venv/bin/activate
+          source venv/bin/activate
           pip install -r requirements.txt
 
       - name: Run migrations
         run: |
-          . venv/bin/activate
-          python manage.py migrate  # This is necessary for tests if you have migrations
+          source venv/bin/activate
+          python manage.py migrate
 
       - name: Run tests with pytest
         run: |
-          . venv/bin/activate
+          source venv/bin/activate
           pytest  # Use Django's test database
 
       - name: Notify on success

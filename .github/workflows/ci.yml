@@ -27,29 +27,15 @@ jobs:
           . venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Debug environment variables
-        run: |
-          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}"
-          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}"
-          echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}"
-          echo "DATABASE_USER=${{ secrets.DATABASE_USER }}"
-        env:
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-
-      - name: Run tests
+      - name: Run migrations
         run: |
           . venv/bin/activate
-          pytest
-        env:
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-          DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          python manage.py migrate  # This is necessary for tests if you have migrations
+
+      - name: Run tests with pytest
+        run: |
+          . venv/bin/activate
+          pytest  # Use Django's test database
 
       - name: Notify on success
         if: success()

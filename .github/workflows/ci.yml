@@ -27,15 +27,10 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Run migrations
+      - name: Run tests
         run: |
           source venv/bin/activate
-          python manage.py migrate
-
-      - name: Run tests with pytest
-        run: |
-          source venv/bin/activate
-          pytest  # Use Django's test database
+          pytest -v --maxfail=1 --disable-warnings
 
       - name: Notify on success
         if: success()

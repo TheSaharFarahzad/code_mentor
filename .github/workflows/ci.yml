@@ -43,9 +43,9 @@ jobs:
 
       - name: Run migrations
         env:
-          DATABASE_HOST: db
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: 5432
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
@@ -54,9 +54,9 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_HOST: db
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: 5432
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |

@@ -9,33 +9,41 @@ on:
       - master
 
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
 
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ${{ secrets.DATABASE_USER }}"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Check out code
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12' 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
 
-      - name: Install dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Run tests
-        run: |
-          source venv/bin/activate
-          pytest -v --maxfail=1 --disable-warnings
+    - name: Run migrations
+      run: python manage.py migrate
 
-      - name: Notify on success
-        if: success()
-        run: echo "✅ All tests passed!"
-      
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Some tests failed!"
+    - name: Run tests with pytest
+      run: pytest

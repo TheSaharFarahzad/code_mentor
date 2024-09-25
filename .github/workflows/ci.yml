@@ -9,42 +9,45 @@ on:
       - master
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
 
-    services:
-      db:
-        image: postgres:16
-        env:
-          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
-          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U ${{ secrets.DATABASE_USER }}"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.12' 
 
       - name: Install dependencies
         run: |
+          python -m venv venv
+          . venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+        env:
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
       - name: Run migrations
-        run: python manage.py migrate
-
-      - name: Run tests with pytest
         run: |
+          . venv/bin/activate
+          python manage.py migrate
+
+      - name: Run tests
+        run: |
+          . venv/bin/activate
           pytest
+
+      - name: Notify on success
+        if: success()
+        run: echo "✅ All tests passed!"
+      
+      - name: Notify on failure
+        if: failure()
+        run: echo "❌ Some tests failed!"

@@ -21,6 +21,11 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ${{ secrets.DATABASE_USER }}"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Check out code
@@ -41,13 +46,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Show database logs
+        run: |
+          echo "Fetching PostgreSQL database logs..."
+          docker logs $(docker ps -q -f "ancestor=postgres:16")
+
       - name: Wait for database to be ready
         run: |
           for i in {1..30}; do
             if pg_isready -h db -U ${{ secrets.DATABASE_USER }}; then
+              echo "Database is ready!"
               break
             fi
-            echo "Waiting for database..."
+            echo "Waiting for database... (attempt $i)"
             sleep 2
           done
 
@@ -60,6 +71,7 @@ jobs:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           source venv/bin/activate
+          echo "Running migrations..."
           python manage.py migrate
 
       - name: Run tests
@@ -71,4 +83,5 @@ jobs:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           source venv/bin/activate
+          echo "Running tests..."
           pytest

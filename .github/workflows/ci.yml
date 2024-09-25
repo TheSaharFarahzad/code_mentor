@@ -29,21 +29,22 @@ jobs:
           --health-retries 5
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
 
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Run migrations
-      run: python manage.py migrate
+      - name: Run migrations
+        run: python manage.py migrate
 
-    - name: Run tests with pytest
-      run: pytest
+      - name: Run tests with pytest
+        run: |
+          pytest

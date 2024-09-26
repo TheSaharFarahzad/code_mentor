@@ -22,10 +22,10 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres"  # Check if PostgreSQL is ready
-          --health-interval=10s  # Check readiness every 10 seconds
-          --health-timeout=5s  # Timeout for readiness check
-          --health-retries=5  # Retry checks 5 times
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout code

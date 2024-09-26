@@ -40,6 +40,12 @@ jobs:
         run: |
           python -m venv venv
 
+      - name: Use environment variables
+        run: |
+          echo "DATABASE_URL: ${{ secrets.DATABASE_URL }}"
+          echo "DATABASE_USER: ${{ secrets.DATABASE_USER }}"
+          echo "DATABASE_NAME: ${{ secrets.DATABASE_NAME }}"
+
       - name: Activate virtual environment and install dependencies
         run: |
           source venv/bin/activate
@@ -64,9 +70,9 @@ jobs:
 
       - name: Run migrations
         env:
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_HOST: db
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_PORT: 5432
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
@@ -74,14 +80,19 @@ jobs:
           echo "Running migrations..."
           python manage.py migrate
 
+      - name: Check if migrations were successful
+        run: |
+          echo "Checking migration status..."
+          python manage.py showmigrations
+
       - name: Run tests
         env:
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_HOST: db
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_PORT: 5432
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           source venv/bin/activate
           echo "Running tests..."
-          pytest
+          pytest || { echo "Tests failed"; exit 1; }

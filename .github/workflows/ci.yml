@@ -9,39 +9,92 @@ on:
       - master
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ${{ secrets.DATABASE_USER }}"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.12' 
+          python-version: '3.12'
+
+      - name: Create virtual environment
+        run: |
+          python -m venv venv
 
       - name: Install dependencies
         run: |
-          python -m venv venv
-          . venv/bin/activate
+          source venv/bin/activate
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Run migrations
         env:
-          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_HOST: db
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_PORT: 5432
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        run: |
+          source venv/bin/activate
+          echo "Running migrations..."
+          python manage.py migrate
+
+  test:
+    runs-on: ubuntu-latest
+
+    needs: build
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      - name: Activate virtual environment and install dependencies
+        run: |
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run tests
+        env:
+          DATABASE_HOST: db
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_PORT: 5432
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
-          . venv/bin/activate
-          pytest
-
-      - name: Notify on success
-        if: success()
-        run: echo "✅ All tests passed!"
-      
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Some tests failed!"
+          source venv/bin/activate
+          echo "Running tests..."
+          pytest || { echo "Tests failed"; exit 1; }

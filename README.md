@@ -5,7 +5,6 @@ This is a Django web application for Code Mentor that allows mentors to teach an
 
 ## 1. <a name='CloneRepository'></a>Clone the Repository
 
-
 To clone the repository initially:
 
 ```bash
@@ -17,11 +16,136 @@ If you have already cloned the repository and want to update it, use the followi
 ```bash
 git pull origin master
 ```
- 
-## 2. <a name='EnvironmentVariables'></a>Environment Variables
+
+## 2. System Requirements
+
+You'll need Python 3, PostgreSQL to be installed on your machine:
+
+On Linux, via apt:
+
+```bash
+sudo apt-get update
+sudo apt-get install python3
+sudo apt-get install python3-pip postgresql
+```
+
+Install Python on Windows:
+
+1. Download the latest version of Python from [python.org](https://www.python.org/downloads/).
+2. Run the installer and ensure to select "Add Python to PATH" during installation to add Python to your system's PATH for use in Command Prompt.
+
+Install PostgreSQL on Windows:
+
+1. Visit the official PostgreSQL website: [PostgreSQL Downloads](https://www.postgresql.org/download/).
+2. Download the Windows installer (.exe file).
+3. Run the downloaded installer file.
+4. Follow the installation steps to select components (like PostgreSQL server and pgAdmin), choose an installation directory, configure the database server, and set passwords.
+6. Complete the installation process as guided by the installer.
 
 
-### 2.1 Python Environment
+## 3. <a name='PostgreSQL'></a>PostgreSQL
+
+If your database is not set up, you'll need to configure it. You can use your favorite PostgreSQL admin tool or the command line interface (CLI):
+
+Windows:
+Open Command Prompt or PowerShell as administrator. Navigate to the PostgreSQL bin directory:
+```bash
+psql -U postgres
+```
+
+Linux:
+Open the terminal. Switch to the PostgreSQL superuser and open PostgreSQL CLI:
+```bash
+sudo -u postgres psql
+```
+
+After accessing the PostgreSQL command line, use the following SQL commands to create a user, set passwords, configure the database, and manage privileges:
+
+```sql
+
+-- Create a new PostgreSQL user with a secure password:
+-- Replace <your_unique_user> and <your_secure_password> with your actual username and password.
+CREATE USER <your_unique_user> WITH PASSWORD '<your_secure_password>';
+
+-- Change the password for the superuser if needed:
+-- Replace <your_secure_password> with your desired password.
+ALTER USER <your_unique_user> WITH PASSWORD '<your_secure_password>';
+
+-- Create a new database and assign ownership to the new user:
+-- Replace <your_unique_db_name> with the name of your database.
+CREATE DATABASE <your_unique_db_name> OWNER <your_unique_user>;
+
+-- To copy the entire database (its structure and data) to a new one:
+-- Replace <new_db_name> with the name of the new database.
+CREATE DATABASE <new_db_name> WITH TEMPLATE <your_unique_db_name>;
+
+-- Exit PostgreSQL:
+\q
+
+```
+
+## 4. Environment Variables Setup
+
+To manage sensitive information like database credentials, create a `.env` file in the root directory of your project and add your database credentials:
+
+```
+DB_NAME=<your_unique_db_name>
+DB_USER=<your_unique_user>
+DB_PASSWORD=<your_secure_password>
+```
+**NOTE**: Ensure this file is kept private and not tracked by Git.
+
+
+## 4. <a name='Setup'></a>Setup
+
+In this section we explain how you can set up the project with/without Docker.
+
+### 4.1. <a name='SetupWithDocker'></a>With Docker
+
+You can run the application locally using Docker Compose. Ensure that both Docker and Docker Compose are installed on your machine.
+You can manage the containers with the following commands:
+
+```bash
+cd code_mentor
+
+# Create and run the containers, building the images before starting.
+docker compose up --detach --build
+
+# List the running containers.
+docker-compose ps
+
+# List all containers, including stopped ones.
+docker-compose ps -a
+
+# Read the logs of the running containers.
+docker-compose logs
+
+# Stop the containers.
+docker-compose stop
+
+# Stop the containers for a single service, e.g., the database.
+docker-compose stop db
+
+# Start the containers.
+docker-compose start
+
+# Start the containers for a single service, e.g., the database.
+docker-compose start db
+
+# Stop and remove the containers, including any named volumes.
+# WARNING: This removes the volumes, so important data can be lost. Leave out `--volumes` if needed.
+docker-compose down --volumes
+
+# List all images created by Docker Compose.
+docker-compose images
+
+# Remove specific images by their image ID. Use -f to force removal.
+docker-compose rmi -f <image_id_1> <image_id_2>
+```
+
+### 4.2. <a name='SetupWithoutDocker'></a>Without Docker
+
+#### 4.2.1 Python Environment
 
 For maintaining a clean development environment, it's recommended to use a virtual environment for installing application-specific packages. There are various methods to create virtual environments, such as using Pipenv. Below is an example demonstrating how to set up a virtual environment using native tools:
 
@@ -63,86 +187,8 @@ To deactivate the virtual environment you just need to run the following command
 deactivate
 ```
 
-### 2.2 System Requirements
 
-You'll need Python 3, PostgreSQL to be installed on your machine:
-
-On Linux, via apt:
-
-```bash
-sudo apt-get update
-sudo apt-get install python3
-sudo apt-get install python3-pip postgresql
-```
-
-Install Python on Windows:
-
-1. Download the latest version of Python from [python.org](https://www.python.org/downloads/).
-2. Run the installer and ensure to select "Add Python to PATH" during installation to add Python to your system's PATH for use in Command Prompt.
-
-Install PostgreSQL on Windows:
-
-1. Visit the official PostgreSQL website: [PostgreSQL Downloads](https://www.postgresql.org/download/).
-2. Download the Windows installer (.exe file).
-3. Run the downloaded installer file.
-4. Follow the installation steps to select components (like PostgreSQL server and pgAdmin), choose an installation directory, configure the database server, and set passwords.
-6. Complete the installation process as guided by the installer.
-
-
-#### *PostgreSQL*
-
-If your database is not set up, you'll need to configure it. You can use your favorite PostgreSQL admin tool or the command line interface (CLI):
-
-Windows:
-Open Command Prompt or PowerShell as administrator. Navigate to the PostgreSQL bin directory:
-```bash
-psql -U postgres
-```
-
-Linux:
-Open the terminal. Switch to the PostgreSQL superuser and open PostgreSQL CLI:
-```bash
-sudo -u postgres psql
-```
-
-After accessing the PostgreSQL command line, use the following SQL commands to create a user, set passwords, configure the database, and manage privileges:
-
-```sql
-
--- Create a new PostgreSQL user with a secure password:
--- Replace <your_unique_user> and <your_secure_password> with your actual username and password.
-CREATE USER <your_unique_user> WITH PASSWORD '<your_secure_password>';
-
--- Change the password for the superuser if needed:
--- Replace <your_secure_password> with your desired password.
-ALTER USER <your_unique_user> WITH PASSWORD '<your_secure_password>';
-
--- Create a new database and assign ownership to the new user:
--- Replace <your_unique_db_name> with the name of your database.
-CREATE DATABASE <your_unique_db_name> OWNER <your_unique_user>;
-
--- To copy the entire database (its structure and data) to a new one:
--- Replace <new_db_name> with the name of the new database.
-CREATE DATABASE <new_db_name> WITH TEMPLATE <your_unique_db_name>;
-
--- Exit PostgreSQL:
-\q
-
-```
-
-### 2.3 Environment Variables Setup
-
-To manage sensitive information like database credentials, create a `.env` file in the root directory of your project and add your database credentials:
-
-```
-DB_NAME=<your_unique_db_name>
-DB_USER=<your_unique_user>
-DB_PASSWORD=<your_secure_password>
-```
-**NOTE**: Ensure this file is kept private and not tracked by Git.
-
-
-### 2.4 Run Server
+#### 4.2.2 Run Server
 
 If you want to run the app locally, you need to execute the `migrate` command to create your database tables. Make sure you have set up your local database as described in the PostgreSQL section:
 

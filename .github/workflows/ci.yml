@@ -40,33 +40,11 @@ jobs:
         run: |
           python -m venv venv
 
-      - name: Use environment variables
-        run: |
-          echo "DATABASE_URL: ${{ secrets.DATABASE_URL }}"
-          echo "DATABASE_USER: ${{ secrets.DATABASE_USER }}"
-          echo "DATABASE_NAME: ${{ secrets.DATABASE_NAME }}"
-
-      - name: Activate virtual environment and install dependencies
+      - name: Install dependencies
         run: |
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Show database logs
-        run: |
-          echo "Fetching PostgreSQL database logs..."
-          docker logs $(docker ps -q -f "ancestor=postgres:16")
-
-      - name: Wait for database to be ready
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h db -U ${{ secrets.DATABASE_USER }}; then
-              echo "Database is ready!"
-              break
-            fi
-            echo "Waiting for database... (attempt $i)"
-            sleep 2
-          done
 
       - name: Run migrations
         env:
@@ -80,10 +58,34 @@ jobs:
           echo "Running migrations..."
           python manage.py migrate
 
-      - name: Check if migrations were successful
+  test:
+    runs-on: ubuntu-latest
+
+    needs: build
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      - name: Activate virtual environment and install dependencies
         run: |
-          echo "Checking migration status..."
-          python manage.py showmigrations
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run tests
         env:

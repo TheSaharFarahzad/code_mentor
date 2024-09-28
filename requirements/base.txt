@@ -1,0 +1,33 @@
+# Django
+# ------------------------------------------------------------------------------
+Django>=4.2, <4.3  # https://docs.djangoproject.com/en/dev/
+django-environ  # https://github.com/joke2k/django-environ
+asgiref==3.8.1  # https://asgiref.readthedocs.io/en/stable/
+
+# Django Rest Framework (DRF)
+# ------------------------------------------------------------------------------
+djangorestframework==3.14.0  # https://www.django-rest-framework.org/
+
+# Authentication
+# ------------------------------------------------------------------------------
+djangorestframework-simplejwt==5.3.1  # https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
+PyJWT==2.9.0  # https://pyjwt.readthedocs.io/en/stable/
+
+# Database
+# ------------------------------------------------------------------------------
+psycopg2-binary==2.9.9  # https://www.psycopg.org/docs/
+sqlparse==0.5.1  # https://github.com/andialbrecht/sqlparse
+tzdata==2024.1  # Time zone database
+
+# Time Zone and Localization
+# ------------------------------------------------------------------------------
+pytz==2024.2  # https://pytz.sourceforge.net/
+
+# Testing
+# ------------------------------------------------------------------------------
+pytest  # https://github.com/pytest-dev/pytest
+pytest-django  # https://github.com/pytest-dev/pytest-django
+
+# Rest Documentation
+# -----------------------------------------------------------------------------
+drf-spectacular==0.26.0  # https://drf-spectacular.readthedocs.io/en/latest/
